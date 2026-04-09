@@ -1,0 +1,78 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_credentialId",
+        "type": "string"
+      }
+    ],
+    "name": "verifyCredential",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "credentialId",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "studentName",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "studentId",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "degree",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "institution",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "ipfsHash",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "issueDate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "expiryDate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "issuedBy",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "isRevoked",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CredentialVerification.Credential",
+        "name": "",
+        "type": "tuple"
+      },
+      {
+        "internalType": "bool",
+        "name": "isValid",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
