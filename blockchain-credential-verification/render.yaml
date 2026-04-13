@@ -1,6 +1,7 @@
 services:
   - type: web
     name: blockcred-api
+    rootDirectory: server
     runtime: node
     plan: free
     buildCommand: npm install
