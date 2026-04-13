@@ -1,0 +1,39 @@
+const mongoose = require('mongoose');
+const User = require('./server/models/User');
+const bcrypt = require('bcryptjs');
+const dotenv = require('dotenv');
+
+dotenv.config({ path: './server/.env' });
+
+const seedAdmin = async () => {
+    try {
+        await mongoose.connect(process.env.MONGO_URI);
+        console.log('MongoDB Connected...');
+
+        const adminExists = await User.findOne({ role: 'admin' });
+        if (adminExists) {
+            console.log('Admin already exists:', adminExists.email);
+            process.exit();
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash('admin123', salt);
+
+        await User.create({
+            name: 'Super Admin',
+            email: 'admin@blockcred.com',
+            password: hashedPassword,
+            role: 'admin'
+        });
+
+        console.log('First admin created successfully!');
+        console.log('Email: admin@blockcred.com');
+        console.log('Password: admin123');
+        process.exit();
+    } catch (error) {
+        console.error('Error seeding admin:', error.message);
+        process.exit(1);
+    }
+};
+
+seedAdmin();

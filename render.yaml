@@ -1,7 +1,7 @@
 services:
   - type: web
     name: blockcred-api
-    rootDir: server
+    rootDir: blockchain-credential-verification/server
     runtime: node
     plan: free
     buildCommand: npm install
