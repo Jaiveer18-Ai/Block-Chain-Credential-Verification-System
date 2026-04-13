@@ -1,0 +1,37 @@
+# Master Security Shield (.gitignore)
+
+# Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Dependencies
+node_modules/
+jspm_packages/
+
+# Build & Output
+dist/
+dist-ssr/
+build/
+*.local
+android/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Testing
+coverage/
+.mongodb-memory-server/
+
+# Capacitor / Mobile
+capacitor.config.json
+client/android/
+client/ios/

@@ -36,7 +36,11 @@ const issueCredentialOnChain = async (credData) => {
         credData.institution,
         credData.ipfsHash,
         Math.floor(new Date(credData.issueDate).getTime() / 1000), // Unix timestamp
-        credData.expiryDate ? Math.floor(new Date(credData.expiryDate).getTime() / 1000) : 0
+        credData.expiryDate ? Math.floor(new Date(credData.expiryDate).getTime() / 1000) : 0,
+        {
+            maxFeePerGas: ethers.parseUnits("35", "gwei"),
+            maxPriorityFeePerGas: ethers.parseUnits("35", "gwei")
+        }
     );
     
     const receipt = await tx.wait();

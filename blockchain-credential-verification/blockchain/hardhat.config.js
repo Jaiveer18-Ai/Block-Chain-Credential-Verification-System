@@ -4,7 +4,15 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const config = {
-  solidity: "0.8.20",
+  solidity: {
+    version: "0.8.20",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
+  },
   networks: {
     amoy: {
       url: process.env.ALCHEMY_RPC_URL || "",

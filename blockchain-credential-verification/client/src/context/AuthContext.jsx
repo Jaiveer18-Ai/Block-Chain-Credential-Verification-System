@@ -19,12 +19,14 @@ export const AuthProvider = ({ children }) => {
         const { data } = await api.post('/auth/login', { email, password });
         localStorage.setItem('userInfo', JSON.stringify(data));
         setUser(data);
+        return data;
     };
 
     const register = async (userData) => {
         const { data } = await api.post('/auth/register', userData);
         localStorage.setItem('userInfo', JSON.stringify(data));
         setUser(data);
+        return data;
     };
 
     const logout = () => {
@@ -32,8 +34,16 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
+    // Update user state after profile changes (keeps token intact)
+    const updateUser = (updatedFields) => {
+        const current = JSON.parse(localStorage.getItem('userInfo'));
+        const merged = { ...current, ...updatedFields };
+        localStorage.setItem('userInfo', JSON.stringify(merged));
+        setUser(merged);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     );

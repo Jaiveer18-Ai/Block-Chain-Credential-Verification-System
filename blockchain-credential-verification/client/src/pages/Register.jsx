@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import { UserPlus, Wallet } from 'lucide-react';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -19,9 +20,15 @@ const Register = () => {
     const { register, user } = useContext(AuthContext);
     const navigate = useNavigate();
 
+    const { ref: formRef, isVisible: formVisible } = useScrollReveal({ threshold: 0.1 });
+
     useEffect(() => {
         if (user) {
-            navigate(user.role === 'institution' ? '/institution/dashboard' : '/student/dashboard');
+            if (user.role === 'admin') {
+                navigate('/admin/dashboard');
+            } else {
+                navigate('/');
+            }
         }
     }, [user, navigate]);
 
@@ -54,85 +61,93 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-screen py-16 flex items-center justify-center relative bg-slate-900 overflow-hidden px-4">
-             {/* Dynamic Background */}
-             <div className="absolute top-[10%] left-[-20%] w-[500px] h-[500px] bg-secondary rounded-full mix-blend-screen filter blur-[120px] opacity-60 animate-blob"></div>
-             <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-sky-500 rounded-full mix-blend-screen filter blur-[120px] opacity-50 animate-blob animation-delay-4000"></div>
+        <div className="min-h-screen py-16 flex items-center justify-center relative bg-[#0f0f14] overflow-hidden px-4">
+             {/* Premium Grid Background */}
+             <div className="absolute inset-0 bg-grid-pattern opacity-30 z-0 pointer-events-none"></div>
 
-            <div className="max-w-xl w-full glass-effect rounded-3xl shadow-2xl relative z-10 mx-auto animate-in fade-in slide-in-from-bottom-10 duration-700">
+             {/* Dynamic Background Blobs */}
+             <div className="absolute inset-0 z-0 pointer-events-none animate-fade-in-up">
+                 <div className="absolute top-[10%] left-[10%] w-[500px] h-[500px] bg-violet-500 rounded-full mix-blend-screen filter blur-[120px] opacity-10 animate-blob"></div>
+                 <div className="absolute bottom-[10%] right-[10%] w-[400px] h-[400px] bg-emerald-500 rounded-full mix-blend-screen filter blur-[120px] opacity-8 animate-blob animation-delay-4000"></div>
+             </div>
+
+            <div 
+                ref={formRef}
+                className={`max-w-xl w-full glass-effect rounded-[2.5rem] shadow-[0_20px_50px_rgba(212,160,83,0.08)] border border-[#d4a053]/15 relative z-10 mx-auto reveal-hidden ${formVisible ? 'animate-scale-up' : ''}`}
+            >
                 <div className="p-10">
                     <div className="text-center mb-10">
-                        <div className="bg-white/20 p-3 rounded-full inline-block mb-4 shadow-inner">
-                            <Wallet className="w-10 h-10 text-primary" />
+                        <div className={`bg-gradient-to-br from-secondary to-accent p-4 rounded-2xl inline-flex mb-6 shadow-lg text-[#0f0f14] reveal-hidden ${formVisible ? 'animate-fade-in-up delay-100' : ''}`}>
+                            <Wallet className="w-8 h-8" />
                         </div>
-                        <h2 className="text-3xl font-black text-slate-900 drop-shadow-sm tracking-tight">Create Identity</h2>
-                        <p className="text-slate-700 mt-2 font-medium">Register your institutional or student wallet profile</p>
+                        <h2 className={`text-3xl font-black text-[#e8e4df] drop-shadow-sm tracking-tight reveal-hidden ${formVisible ? 'animate-fade-in-up delay-200' : ''}`}>Create Identity</h2>
+                        <p className={`text-[#a8a29e] mt-2 font-medium reveal-hidden ${formVisible ? 'animate-fade-in-up delay-300' : ''}`}>Register your institutional or student wallet profile</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         
                         {/* Role Selection */}
-                        <div className="flex bg-white/50 rounded-xl p-1 shadow-inner border border-white/40 backdrop-blur-sm">
+                        <div className={`flex bg-[#0f0f14]/50 rounded-xl p-1 shadow-inner border border-[#2a2a34] backdrop-blur-sm reveal-hidden ${formVisible ? 'animate-fade-in-up delay-400' : ''}`}>
                             <button
                                 type="button"
                                 onClick={() => setFormData({...formData, role: 'student'})}
-                                className={`flex-1 py-3 text-sm font-black rounded-lg transition-all ${formData.role === 'student' ? 'bg-primary shadow-md text-white scale-[1.02]' : 'text-slate-700 hover:text-slate-900'}`}
+                                className={`flex-1 py-3 text-sm font-black rounded-lg transition-all ${formData.role === 'student' ? 'bg-primary shadow-md text-[#0f0f14] scale-[1.02]' : 'text-[#57534e] hover:text-[#a8a29e]'}`}
                             >
                                 Student
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setFormData({...formData, role: 'institution'})}
-                                className={`flex-1 py-3 text-sm font-black rounded-lg transition-all ${formData.role === 'institution' ? 'bg-primary shadow-md text-white scale-[1.02]' : 'text-slate-700 hover:text-slate-900'}`}
+                                className={`flex-1 py-3 text-sm font-black rounded-lg transition-all ${formData.role === 'institution' ? 'bg-primary shadow-md text-[#0f0f14] scale-[1.02]' : 'text-[#57534e] hover:text-[#a8a29e]'}`}
                             >
                                 Institution
                             </button>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-bold text-slate-800 mb-2">Full Name</label>
+                        <div className={`reveal-hidden ${formVisible ? 'animate-fade-in-up delay-500' : ''}`}>
+                            <label className="block text-sm font-bold text-[#e8e4df] mb-2">Full Name</label>
                             <input 
                                 type="text" name="name" required
                                 value={formData.name} onChange={handleChange}
-                                className="w-full px-5 py-4 rounded-xl bg-white/70 border border-white/50 focus:bg-white focus:ring-4 focus:ring-primary/30 focus:border-primary transition outline-none text-slate-900 shadow-sm"
+                                className="w-full px-5 py-4 rounded-xl bg-[#0f0f14]/70 border border-[#2a2a34] focus:bg-[#0f0f14] focus:ring-4 focus:ring-primary/20 focus:border-primary transition outline-none text-[#e8e4df] shadow-sm placeholder-[#57534e]"
                             />
                         </div>
 
                         {formData.role === 'institution' && (
-                            <div className="animate-in fade-in zoom-in-95 duration-300">
-                                <label className="block text-sm font-bold text-slate-800 mb-2">Registered Institution Name</label>
+                            <div className="animate-fade-in-up">
+                                <label className="block text-sm font-bold text-[#e8e4df] mb-2">Registered Institution Name</label>
                                 <input 
                                     type="text" name="institutionName" required
                                     value={formData.institutionName} onChange={handleChange}
-                                    className="w-full px-5 py-4 rounded-xl bg-white/70 border border-white/50 focus:bg-white focus:ring-4 focus:ring-primary/30 focus:border-primary transition outline-none text-slate-900 shadow-sm"
+                                    className="w-full px-5 py-4 rounded-xl bg-[#0f0f14]/70 border border-[#2a2a34] focus:bg-[#0f0f14] focus:ring-4 focus:ring-primary/20 focus:border-primary transition outline-none text-[#e8e4df] shadow-sm placeholder-[#57534e]"
                                 />
                             </div>
                         )}
 
-                        <div>
-                            <label className="block text-sm font-bold text-slate-800 mb-2">Email Address</label>
+                        <div className={`reveal-hidden ${formVisible ? 'animate-fade-in-up delay-[600ms]' : ''}`}>
+                            <label className="block text-sm font-bold text-[#e8e4df] mb-2">Email Address</label>
                             <input 
                                 type="email" name="email" required
                                 value={formData.email} onChange={handleChange}
-                                className="w-full px-5 py-4 rounded-xl bg-white/70 border border-white/50 focus:bg-white focus:ring-4 focus:ring-primary/30 focus:border-primary transition outline-none text-slate-900 shadow-sm"
+                                className="w-full px-5 py-4 rounded-xl bg-[#0f0f14]/70 border border-[#2a2a34] focus:bg-[#0f0f14] focus:ring-4 focus:ring-primary/20 focus:border-primary transition outline-none text-[#e8e4df] shadow-sm placeholder-[#57534e]"
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className={`grid grid-cols-2 gap-4 reveal-hidden ${formVisible ? 'animate-fade-in-up delay-[700ms]' : ''}`}>
                             <div>
-                                <label className="block text-sm font-bold text-slate-800 mb-2">Secure Password</label>
+                                <label className="block text-sm font-bold text-[#e8e4df] mb-2">Secure Password</label>
                                 <input 
                                     type="password" name="password" required minLength="6"
                                     value={formData.password} onChange={handleChange}
-                                    className="w-full px-5 py-4 rounded-xl bg-white/70 border border-white/50 focus:bg-white focus:ring-4 focus:ring-primary/30 focus:border-primary transition outline-none text-slate-900 shadow-sm"
+                                    className="w-full px-5 py-4 rounded-xl bg-[#0f0f14]/70 border border-[#2a2a34] focus:bg-[#0f0f14] focus:ring-4 focus:ring-primary/20 focus:border-primary transition outline-none text-[#e8e4df] shadow-sm placeholder-[#57534e]"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-slate-800 mb-2">Confirm Key</label>
+                                <label className="block text-sm font-bold text-[#e8e4df] mb-2">Confirm Key</label>
                                 <input 
                                     type="password" name="confirmPassword" required minLength="6"
                                     value={formData.confirmPassword} onChange={handleChange}
-                                    className="w-full px-5 py-4 rounded-xl bg-white/70 border border-white/50 focus:bg-white focus:ring-4 focus:ring-primary/30 focus:border-primary transition outline-none text-slate-900 shadow-sm"
+                                    className="w-full px-5 py-4 rounded-xl bg-[#0f0f14]/70 border border-[#2a2a34] focus:bg-[#0f0f14] focus:ring-4 focus:ring-primary/20 focus:border-primary transition outline-none text-[#e8e4df] shadow-sm placeholder-[#57534e]"
                                 />
                             </div>
                         </div>
@@ -140,13 +155,13 @@ const Register = () => {
                         <button 
                             type="submit" 
                             disabled={isSubmitting}
-                            className="w-full py-4 px-4 bg-gradient-to-r from-primary to-secondary hover:from-primary hover:to-primary text-white font-black text-lg rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:shadow-[0_0_30px_rgba(37,99,235,0.6)] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transform hover:-translate-y-1 mt-6"
+                            className={`w-full py-4 px-4 bg-gradient-to-r from-primary to-[#b8862e] hover:from-[#b8862e] hover:to-primary text-[#0f0f14] font-black text-lg rounded-xl shadow-[0_0_20px_rgba(212,160,83,0.3)] hover:shadow-[0_0_30px_rgba(212,160,83,0.5)] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transform hover:-translate-y-1 mt-6 reveal-hidden ${formVisible ? 'animate-fade-in-up delay-[800ms]' : ''}`}
                         >
-                            {isSubmitting ? 'Generating Wallet...' : <><UserPlus className="w-6 h-6" /> Register Identity</>}
+                            {isSubmitting ? 'Generating...' : <><UserPlus className="w-6 h-6" /> Register Identity</>}
                         </button>
                     </form>
 
-                    <div className="mt-8 text-center text-sm font-bold text-slate-700 border-t border-slate-300 pt-6">
+                    <div className={`mt-8 text-center text-sm font-bold text-[#57534e] border-t border-[#2a2a34] pt-6 reveal-hidden ${formVisible ? 'animate-fade-in-up delay-[900ms]' : ''}`}>
                         Already have access?{' '}
                         <Link to="/login" className="text-primary hover:text-secondary transition underline underline-offset-4">
                             Log in

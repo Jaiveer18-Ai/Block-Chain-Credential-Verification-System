@@ -2,7 +2,10 @@ import hre from "hardhat";
 
 async function main() {
   const CredentialVerification = await hre.ethers.getContractFactory("CredentialVerification");
-  const contract = await CredentialVerification.deploy();
+  const contract = await CredentialVerification.deploy({
+    maxFeePerGas: hre.ethers.parseUnits("35", "gwei"),
+    maxPriorityFeePerGas: hre.ethers.parseUnits("35", "gwei")
+  });
 
   await contract.waitForDeployment();
 

@@ -13,10 +13,21 @@ const pinata = new PinataSDK({
 const axios = require('axios');
 const FormData = require('form-data');
 
-const uploadToIPFS = async (fileBuffer, fileName) => {
+const uploadToIPFS = async (fileBuffer, fileName, metadata = {}) => {
     try {
         const formData = new FormData();
         formData.append('file', fileBuffer, { filename: fileName });
+        
+        // Add metadata to Pinata to ensure unique entries in the dashboard
+        const pinataMetadata = JSON.stringify({
+            name: fileName,
+            keyvalues: {
+                studentId: metadata.studentId || 'N/A',
+                degree: metadata.degree || 'N/A',
+                issuedAt: new Date().toISOString()
+            }
+        });
+        formData.append('pinataMetadata', pinataMetadata);
 
         const res = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
             headers: {
@@ -31,8 +42,9 @@ const uploadToIPFS = async (fileBuffer, fileName) => {
             ipfsUrl: `https://gateway.pinata.cloud/ipfs/${res.data.IpfsHash}`
         };
     } catch (error) {
-        console.error('Error uploading to IPFS:', error.message);
-        throw new Error('IPFS Upload Failed');
+        console.error('Error uploading to IPFS:', error.message, error.response?.data || '');
+        const details = error.response?.data?.error || error.response?.data?.message || error.message;
+        throw new Error('IPFS Upload Failed: ' + details);
     }
 };
 

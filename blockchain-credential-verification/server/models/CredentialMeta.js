@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const credentialMetaSchema = new mongoose.Schema({
     credentialId: { type: String, required: true, unique: true },
     studentName: { type: String, required: true },
+    studentEmail: { type: String, required: true },
     studentId: { type: String, required: true },
     degree: { type: String, required: true },
     institution: { type: String, required: true },

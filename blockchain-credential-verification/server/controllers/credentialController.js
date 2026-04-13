@@ -1,20 +1,30 @@
 const CredentialMeta = require('../models/CredentialMeta');
 const { uploadToIPFS } = require('../utils/ipfsUpload');
 const { issueCredentialOnChain, revokeCredentialOnChain } = require('../utils/blockchain');
+const { sendCredentialNotification } = require('../utils/emailService');
 const crypto = require('crypto');
 
 const issueCredential = async (req, res) => {
     try {
-        const { studentName, studentId, degree, expiryDate } = req.body;
+        const { studentName, studentEmail, studentId, degree, expiryDate } = req.body;
         const institution = req.user.institutionName;
         const issuedBy = req.user._id;
 
-        if (!studentName || !studentId || !degree || !req.file) {
+        if (!studentName || !studentEmail || !studentId || !degree || !req.file) {
             return res.status(400).json({ message: 'Missing required fields or certificate PDF' });
         }
 
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(studentEmail)) {
+            return res.status(400).json({ message: 'The student email address is invalid' });
+        }
+
         // Upload to IPFS
-        const { ipfsHash, ipfsUrl } = await uploadToIPFS(req.file.buffer, `${studentId}_${degree}.pdf`);
+        const { ipfsHash, ipfsUrl } = await uploadToIPFS(req.file.buffer, `${studentId}_${degree}.pdf`, {
+            studentId,
+            degree
+        });
 
         // Generate unique credential ID
         const credentialId = "CRED-" + crypto.randomBytes(8).toString('hex').toUpperCase();
@@ -37,6 +47,7 @@ const issueCredential = async (req, res) => {
         const credentialMeta = await CredentialMeta.create({
             credentialId,
             studentName,
+            studentEmail,
             studentId,
             degree,
             institution,
@@ -47,6 +58,19 @@ const issueCredential = async (req, res) => {
             issuedBy,
             isRevoked: false
         });
+
+        // Send Email Notification
+        try {
+            await sendCredentialNotification(studentEmail, studentName, {
+                credentialId,
+                degree,
+                institution
+            });
+        } catch (mailError) {
+            console.warn('Mail notification failed but credential was issued:', mailError.message);
+            // We don't return error here because the credential IS issued on blockchain and DB.
+            // But we could inform the user.
+        }
 
         res.status(201).json({
             message: 'Credential successfully issued',
@@ -70,7 +94,7 @@ const getMyIssuedCredentials = async (req, res) => {
 
 const getMyCredentials = async (req, res) => {
     try {
-        const credentials = await CredentialMeta.find({ studentName: req.user.name }).sort({ createdAt: -1 });
+        const credentials = await CredentialMeta.find({ studentEmail: req.user.email }).sort({ createdAt: -1 });
         res.status(200).json(credentials);
     } catch (error) {
         res.status(500).json({ message: error.message });

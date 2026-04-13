@@ -59,8 +59,18 @@ const loginUser = async (req, res) => {
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
+        
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        if (user.status === 'banned') {
+            return res.status(403).json({ message: 'Account suspended. Please contact the administrator for access recovery.' });
+        }
 
         if (user && (await bcrypt.compare(password, user.password))) {
+            user.isOnline = true;
+            await user.save();
             res.json({
                 _id: user.id,
                 name: user.name,
@@ -85,8 +95,22 @@ const getMe = async (req, res) => {
     }
 };
 
+const logoutUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (user) {
+            user.isOnline = false;
+            await user.save();
+        }
+        res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
     getMe,
+    logoutUser,
 };

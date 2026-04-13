@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: '/api' 
+    // Detect environment: Use Render URL for production/mobile, local fallback for web dev
+    baseURL: import.meta.env.VITE_API_BASE_URL || '/api'
 });
 
 api.interceptors.request.use((config) => {
