@@ -11,20 +11,20 @@ services:
       - key: PORT
         value: 5000
       - key: MONGO_URI
-        sync: false # User will provide this in Render dashboard
+        sync: false
       - key: JWT_SECRET
         generateValue: true
-      - key: PINATA_JWT
-        sync: false # User will provide this
-      - key: PINATA_GATEWAY
-        sync: false # User will provide this
-      - key: ETHEREUM_RPC_URL
-        sync: false # User will provide this
-      - key: PRIVATE_KEY
-        sync: false # User will provide this
-      - key: CONTRACT_ADDRESS
-        sync: false # User will provide this
-      - key: EMAIL_USER
+      - key: ALCHEMY_RPC_URL
         sync: false
-      - key: EMAIL_PASS
+      - key: WALLET_PRIVATE_KEY
+        sync: false
+      - key: CONTRACT_ADDRESS
+        sync: false
+      - key: PINATA_API_KEY
+        sync: false
+      - key: PINATA_SECRET
+        sync: false
+      - key: SMTP_EMAIL
+        sync: false
+      - key: SMTP_PASSWORD
         sync: false
