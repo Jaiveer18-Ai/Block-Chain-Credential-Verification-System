@@ -2,13 +2,7 @@ const { ethers } = require('ethers');
 
 // This ABI should match our compiled contract.
 // We will export the ABI from Hardhat into the client and server manually after testing.
-let contractABI = [];
-try {
-    const abiData = require('../../blockchain/artifacts/contracts/CredentialVerification.sol/CredentialVerification.json');
-    contractABI = abiData.abi;
-} catch (error) {
-    console.warn("Smart Contract ABI not found yet. Will fail blockchain transactions.");
-}
+const contractABI = require('../config/contractABI.json');
 
 const getBlockchainContract = () => {
     if (!process.env.ALCHEMY_RPC_URL || !process.env.WALLET_PRIVATE_KEY || !process.env.CONTRACT_ADDRESS) {

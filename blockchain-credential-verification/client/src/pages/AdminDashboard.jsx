@@ -49,24 +49,46 @@ const StatCard = ({ title, value, icon: Icon, color, trend }) => {
 const AdminDashboard = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const fetchStats = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const { data } = await api.get('/admin/stats');
+            setStats(data);
+        } catch (err) {
+            console.error('Failed to load stats');
+            setError('System monitor is unable to reach the peer network. Ensure your local server is active and connected to Atlas.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const { data } = await api.get('/admin/stats');
-                setStats(data);
-            } catch (err) {
-                console.error('Failed to load stats');
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchStats();
     }, []);
 
-    if (loading) return <div className="animate-pulse flex items-center justify-center min-h-[400px]">
-        <Activity className="w-12 h-12 text-primary animate-spin" />
-    </div>;
+    if (loading) return (
+        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+            <Activity className="w-12 h-12 text-primary animate-spin" />
+            <p className="text-primary/60 font-black uppercase tracking-widest text-[10px]">Syncing with Cloud Nodes...</p>
+        </div>
+    );
+
+    if (error) return (
+        <div className="flex flex-col items-center justify-center min-h-[400px] bg-rose-500/5 border border-rose-500/10 rounded-[2rem] p-12 text-center">
+            <AlertCircle className="w-16 h-16 text-rose-500 mb-6 animate-pulse" />
+            <h2 className="text-2xl font-black text-[#e8e4df] mb-4">Communication Breakdown</h2>
+            <p className="text-rose-200/60 max-w-md mb-8">{error}</p>
+            <button 
+                onClick={fetchStats}
+                className="px-8 py-4 bg-rose-500 text-white font-black rounded-2xl hover:bg-rose-600 transition-all active:scale-95"
+            >
+                Retry Handshake
+            </button>
+        </div>
+    );
 
     return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
@@ -81,37 +103,37 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <StatCard 
                     title="Global Users" 
-                    value={stats?.totalUsers} 
+                    value={stats?.totalUsers ?? 0} 
                     icon={Users} 
                     color="primary" 
                 />
                 <StatCard 
                     title="Active Sessions" 
-                    value={stats?.activeUsers} 
+                    value={stats?.activeUsers ?? 0} 
                     icon={Activity} 
                     color="emerald" 
                 />
                 <StatCard 
                     title="Institutions" 
-                    value={stats?.totalInstitutions} 
+                    value={stats?.totalInstitutions ?? 0} 
                     icon={Building2} 
                     color="sky" 
                 />
                 <StatCard 
                     title="Student Profiles" 
-                    value={stats?.totalStudents} 
+                    value={stats?.totalStudents ?? 0} 
                     icon={GraduationCap} 
                     color="violet" 
                 />
                 <StatCard 
                     title="Minted Records" 
-                    value={stats?.totalCredentials} 
+                    value={stats?.totalCredentials ?? 0} 
                     icon={ShieldCheck} 
                     color="amber" 
                 />
                 <StatCard 
                     title="Revoked Assets" 
-                    value={stats?.revokedCredentials} 
+                    value={stats?.revokedCredentials ?? 0} 
                     icon={AlertCircle} 
                     color="rose" 
                 />
