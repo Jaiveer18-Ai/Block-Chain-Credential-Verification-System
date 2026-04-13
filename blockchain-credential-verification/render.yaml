@@ -2,6 +2,7 @@ services:
   - type: web
     name: blockcred-api
     runtime: node
+    plan: free
     buildCommand: npm install
     startCommand: node server.js
     envVars:
