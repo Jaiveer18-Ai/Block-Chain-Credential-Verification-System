@@ -39,13 +39,41 @@ const IssueCredential = () => {
 
         try {
             setIsSubmitting(true);
-            await api.post('/credentials/issue', data, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+            const response = await api.post('/credentials/issue', data, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                timeout: 120000 // Matched to backend IPFS timeout
             });
             toast.success('Successfully issued credential!');
             navigate('/institution/dashboard');
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Failed to issue credential');
+            console.error('Issuance detailed error:', err);
+            let errorMessage = 'Failed to issue credential';
+            
+            if (err.code === 'ECONNABORTED') {
+                errorMessage = 'Connection timed out. The blockchain or IPFS network is responding slowly. Please try again.';
+            } else if (err.code === 'ERR_NETWORK') {
+                errorMessage = 'Network Error: Check your internet connection. The server might be unreachable.';
+            } else if (err.response) {
+                const data = err.response.data;
+                if (err.response.status === 413) {
+                    errorMessage = 'File too large for cloud storage.';
+                } else if (data) {
+                    // Extract message from various possible error formats
+                    const rawMsg = data.message || data.error || data;
+                    errorMessage = typeof rawMsg === 'string' ? rawMsg : JSON.stringify(rawMsg);
+                } else {
+                    errorMessage = `Server Error (${err.response.status})`;
+                }
+            } else {
+                errorMessage = err.message || 'An unexpected error occurred';
+            }
+            
+            // Final safety check to ensure we never show [object Object]
+            if (typeof errorMessage !== 'string' || errorMessage.includes('[object Object]')) {
+                errorMessage = 'An internal error occurred. Detailed logs are available in the console.';
+            }
+
+            toast.error(errorMessage, { duration: 8000 });
         } finally {
             setIsSubmitting(false);
         }

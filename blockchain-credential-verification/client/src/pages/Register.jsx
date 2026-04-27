@@ -54,7 +54,28 @@ const Register = () => {
             });
             toast.success('Registration successful!');
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Registration failed');
+            console.error('Registration detailed error:', err);
+            let errorMessage = 'Registration failed';
+            
+            if (err.code === 'ECONNABORTED') {
+                errorMessage = 'Connection timed out. The server is responding slowly. Please try again.';
+            } else if (err.code === 'ERR_NETWORK') {
+                errorMessage = 'Network Error: Check your internet connection. (Is the laptop server running?)';
+            } else if (err.response) {
+                const data = err.response.data;
+                // Extract message from various possible error formats
+                const rawMsg = data.message || data.error || data;
+                errorMessage = typeof rawMsg === 'string' ? rawMsg : JSON.stringify(rawMsg);
+            } else {
+                errorMessage = err.message || 'An unexpected error occurred during registration';
+            }
+            
+            // Final safety check to ensure we never show [object Object]
+            if (typeof errorMessage !== 'string' || errorMessage.includes('[object Object]')) {
+                errorMessage = 'An internal error occurred. Please check your data and try again.';
+            }
+            
+            toast.error(errorMessage, { duration: 8000 });
         } finally {
             setIsSubmitting(false);
         }

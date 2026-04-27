@@ -5,8 +5,11 @@ const { protect } = require('../middleware/auth');
 const { roleCheck } = require('../middleware/roleCheck');
 const { issueCredential, getMyIssuedCredentials, getMyCredentials, revokeCredential } = require('../controllers/credentialController');
 
-// Multer setup for memory storage parsing
-const upload = multer({ storage: multer.memoryStorage() });
+// Multer setup for memory storage parsing - with 10MB limit for stable uploads
+const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
 
 router.post('/issue', protect, roleCheck('institution'), upload.single('certificate'), issueCredential);
 router.get('/my-issued', protect, roleCheck('institution'), getMyIssuedCredentials);

@@ -29,13 +29,21 @@ const uploadToIPFS = async (fileBuffer, fileName, metadata = {}) => {
         });
         formData.append('pinataMetadata', pinataMetadata);
 
+        const headers = {
+            'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+            timeout: 120000 // 120 seconds for mobile compatibility
+        };
+
+        // Prefer JWT if available, else fallback to API Key + Secret
+        if (process.env.PINATA_JWT) {
+            headers['Authorization'] = `Bearer ${process.env.PINATA_JWT}`;
+        } else {
+            headers['pinata_api_key'] = process.env.PINATA_API_KEY;
+            headers['pinata_secret_api_key'] = process.env.PINATA_SECRET;
+        }
+
         const res = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
-            headers: {
-                'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
-                'pinata_api_key': process.env.PINATA_API_KEY,
-                'pinata_secret_api_key': process.env.PINATA_SECRET,
-            },
-            timeout: 30000 // 30 seconds
+            headers
         });
         
         return {
@@ -43,9 +51,27 @@ const uploadToIPFS = async (fileBuffer, fileName, metadata = {}) => {
             ipfsUrl: `https://gateway.pinata.cloud/ipfs/${res.data.IpfsHash}`
         };
     } catch (error) {
-        console.error('Error uploading to IPFS:', error.message, error.response?.data || '');
-        const details = error.response?.data?.error || error.response?.data?.message || error.message;
-        throw new Error('IPFS Upload Failed: ' + details);
+        console.error('IPFS Upload Exception:', {
+            message: error.message,
+            code: error.code,
+            status: error.response?.status,
+            data: error.response?.data
+        });
+        
+        // Extract the most meaningful error snippet
+        let details = 'Unknown IPFS error';
+        if (error.response?.data) {
+            const data = error.response.data;
+            // Handle case where data.error might be an object (Pinata style)
+            const rawMsg = data.error || data.message || data;
+            details = typeof rawMsg === 'string' ? rawMsg : JSON.stringify(rawMsg);
+        } else if (error.code === 'ECONNABORTED') {
+            details = 'Request timed out while connecting to Pinata';
+        } else {
+            details = error.message;
+        }
+        
+        throw new Error(`IPFS Upload Failed: ${details}`);
     }
 };
 

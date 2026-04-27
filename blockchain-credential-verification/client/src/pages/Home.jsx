@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ShieldCheck, Share2, Search, ArrowRight, Lock, CheckCircle, Fingerprint, Award, GraduationCap, Building, Link as LinkIcon, Globe, QrCode, Wallet } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { AuthContext } from '../context/AuthContext';
+import logo from '../assets/logo.png';
 
 const Home = () => {
     const { user } = useContext(AuthContext);
@@ -55,10 +56,10 @@ const Home = () => {
                     <div className="flex-1 text-left max-w-3xl">
                         
                         <div ref={heroHeaderRef}>
-                            <div className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-effect text-primary text-sm font-black border border-primary/20 shadow-sm mb-8 relative reveal-hidden ${heroHeaderVisible ? 'animate-fade-in-up' : ''}`}>
-                                <div className="absolute inset-0 rounded-full bg-amber-900/30 opacity-50 animate-pulse-slow"></div>
-                                <ShieldCheck className="w-5 h-5 relative z-10 text-accent" />
-                                <span className="tracking-widest uppercase relative z-10">Polygon Smart Contracts</span>
+                            <div className={`inline-flex items-center gap-3 px-5 py-2 rounded-full glass-effect text-primary text-sm font-black border border-primary/20 shadow-lg mb-8 relative reveal-hidden ${heroHeaderVisible ? 'animate-fade-in-up' : ''}`}>
+                                <div className="absolute inset-0 rounded-full bg-amber-900/20 opacity-40 animate-pulse-slow"></div>
+                                <img src={logo} alt="brand" className="w-6 h-6 relative z-10 drop-shadow-md" />
+                                <span className="tracking-[0.2em] uppercase relative z-10 text-[11px]">Polygon Smart Contracts</span>
                             </div>
                             
                             <h1 className={`text-6xl md:text-7xl lg:text-[5.5rem] font-black text-[#e8e4df] tracking-tighter leading-[1.1] mb-8 drop-shadow-sm reveal-hidden ${heroHeaderVisible ? 'animate-fade-in-up delay-100' : ''}`}>
@@ -120,9 +121,9 @@ const Home = () => {
                             <div className="absolute z-20 w-[400px] h-[500px] glass-effect rounded-[2.5rem] p-8 shadow-[0_20px_50px_rgba(212,160,83,0.1)] border border-[#d4a053]/20 glow-effect animate-float bg-gradient-to-br from-[#1a1a24]/80 to-[#0f0f14]/50 flex flex-col justify-between hover:shadow-[0_30px_60px_rgba(212,160,83,0.25)] transition-shadow duration-500 hover:-translate-y-2">
                                 <div>
                                     <div className="flex justify-between items-start mb-10">
-                                        <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-lg flex items-center justify-center text-[#0f0f14] relative overflow-hidden group">
-                                            <div className="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                                            <Award className="w-8 h-8" />
+                                        <div className="w-14 h-14 bg-gradient-to-br from-primary/10 to-[#1a1a24] rounded-2xl shadow-lg border border-primary/20 flex items-center justify-center relative overflow-hidden group">
+                                            <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                            <img src={logo} alt="Auth Seal" className="w-10 h-10 relative z-10 drop-shadow-xl" />
                                         </div>
                                         <div className={`bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-xs font-black tracking-widest uppercase flex items-center gap-1 border border-emerald-500/20 ${heroCardVisible ? 'animate-seal delay-[800ms]' : ''}`}>
                                             <CheckCircle className="w-3 h-3 text-emerald-400" /> Valid

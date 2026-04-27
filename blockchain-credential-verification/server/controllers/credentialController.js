@@ -79,7 +79,18 @@ const issueCredential = async (req, res) => {
 
     } catch (error) {
         console.error('Issue Error:', error);
-        res.status(500).json({ message: error.message || 'Internal Server Error' });
+        
+        // Ensure we send a clean string message
+        let clientMessage = 'Internal Server Error during issuance';
+        if (error.message) {
+            clientMessage = error.message;
+        } else if (typeof error === 'string') {
+            clientMessage = error;
+        } else {
+            clientMessage = JSON.stringify(error);
+        }
+
+        res.status(500).json({ message: clientMessage });
     }
 };
 

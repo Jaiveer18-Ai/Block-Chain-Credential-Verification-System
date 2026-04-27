@@ -35,7 +35,27 @@ const Login = () => {
             const data = await login(email, password);
             toast.success(`Welcome back, ${data.name}`, { id: toastId });
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Authentication failed', { id: toastId });
+            console.error('Login detailed error:', err);
+            let errorMessage = 'Authentication failed';
+            
+            if (err.code === 'ECONNABORTED') {
+                errorMessage = 'Connection timed out. Please try again.';
+            } else if (err.code === 'ERR_NETWORK') {
+                errorMessage = 'Network Error: Check your internet connection and Laptop IP.';
+            } else if (err.response) {
+                const data = err.response.data;
+                const rawMsg = data.message || data.error || data;
+                errorMessage = typeof rawMsg === 'string' ? rawMsg : JSON.stringify(rawMsg);
+            } else {
+                errorMessage = err.message || 'An unexpected error occurred';
+            }
+
+            // Final safety check
+            if (typeof errorMessage !== 'string' || errorMessage.includes('[object Object]')) {
+                errorMessage = 'An internal error occurred during login.';
+            }
+            
+            toast.error(errorMessage, { id: toastId, duration: 8000 });
         } finally {
             setIsSubmitting(false);
         }

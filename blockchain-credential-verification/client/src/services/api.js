@@ -1,10 +1,13 @@
 import axios from 'axios';
 
 const api = axios.create({
-    // Detect environment: Use Render URL for production/mobile, local fallback for web dev
-    baseURL: import.meta.env.VITE_API_BASE_URL || '/api'
+    // Dynamically set baseURL: 
+    // If accessing via IP (Android), use VITE_API_URL
+    // If accessing via localhost, ensure it points to the correct place
+    baseURL: import.meta.env.VITE_API_URL
 });
 
+// Interceptor to handle any dynamic URL logic if needed in the future
 api.interceptors.request.use((config) => {
     const userInfo = localStorage.getItem('userInfo');
     if (userInfo) {

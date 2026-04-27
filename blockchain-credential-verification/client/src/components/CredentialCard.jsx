@@ -7,7 +7,8 @@ const CredentialCard = ({ cred, role, onRevoke }) => {
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [isIdCopied, setIsIdCopied] = useState(false);
     
-    const verifyUrl = `${window.location.origin}/verify/${cred.credentialId}`;
+    const productionUrl = import.meta.env.VITE_SITE_URL || 'https://blockcred-app.onrender.com'; // Placeholder/Default
+    const verifyUrl = `${productionUrl}/verify/${cred.credentialId}`;
 
     const handleCopyId = (e) => {
         e.stopPropagation();

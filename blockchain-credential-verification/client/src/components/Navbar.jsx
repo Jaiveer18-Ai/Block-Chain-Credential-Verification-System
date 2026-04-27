@@ -5,6 +5,8 @@ import { ShieldCheck, Menu, X, LogOut, User as UserIcon } from 'lucide-react';
 import ProfileModal from './ProfileModal';
 import { toast } from 'react-hot-toast';
 
+import logo from '../assets/logo.png';
+
 const Navbar = () => {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -28,9 +30,12 @@ const Navbar = () => {
             <div className="w-full px-6 sm:px-10 lg:px-16">
                 <div className="flex justify-between h-16">
                     <div className="flex items-center">
-                        <Link to="/" className="flex items-center gap-2">
-                            <ShieldCheck className="h-8 w-8 text-primary" />
-                            <span className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+                        <Link to="/" className="flex items-center gap-3">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full animate-pulse-slow"></div>
+                                <img src={logo} alt="BlockCred Logo" className="h-9 w-9 relative z-10 drop-shadow-2xl" />
+                            </div>
+                            <span className="font-black text-2xl tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary uppercase">
                                 BlockCred
                             </span>
                         </Link>

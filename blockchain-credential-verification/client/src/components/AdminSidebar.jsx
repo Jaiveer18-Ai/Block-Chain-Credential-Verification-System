@@ -7,10 +7,11 @@ import {
     ShieldCheck, 
     UserPlus, 
     LogOut,
-    Shield
+    Shield,
+    X
 } from 'lucide-react';
 
-const AdminSidebar = ({ onLogout }) => {
+const AdminSidebar = ({ onLogout, isOpen, onClose }) => {
     const navItems = [
         { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
         { name: 'User Directory', icon: Users, path: '/admin/users' },
@@ -19,7 +20,21 @@ const AdminSidebar = ({ onLogout }) => {
     ];
 
     return (
-        <aside className="w-72 bg-[#1a1a24] border-r border-[#26262e] h-screen fixed left-0 top-0 z-50 flex flex-col pt-24 pb-10">
+        <aside className={`
+            w-72 bg-[#1a1a24] border-r border-[#26262e] h-screen fixed left-0 top-0 z-[70] flex flex-col pt-10 md:pt-24 pb-10
+            transition-all duration-500 ease-in-out transform
+            ${isOpen ? 'translate-x-0 shadow-[20px_0_60px_-15px_rgba(0,0,0,0.5)]' : '-translate-x-full md:translate-x-0'}
+        `}>
+            {/* Mobile Close Button */}
+            <div className="md:hidden absolute top-6 right-6">
+                <button 
+                    onClick={onClose}
+                    className="p-2 bg-white/5 rounded-lg text-rose-400 border border-rose-500/20"
+                >
+                    <X className="w-6 h-6" />
+                </button>
+            </div>
+
             <div className="px-8 mb-10">
                 <div className="flex items-center gap-3 px-4 py-3 bg-primary/10 rounded-xl border border-primary/20">
                     <Shield className="w-5 h-5 text-primary" />
@@ -27,11 +42,14 @@ const AdminSidebar = ({ onLogout }) => {
                 </div>
             </div>
 
-            <nav className="flex-grow px-4 space-y-2">
+            <nav className="flex-grow px-4 space-y-2 overflow-y-auto">
                 {navItems.map((item) => (
                     <NavLink
                         key={item.path}
                         to={item.path}
+                        onClick={() => {
+                            if (window.innerWidth < 768) onClose();
+                        }}
                         className={({ isActive }) => `
                             flex items-center gap-4 px-6 py-4 rounded-xl text-sm font-bold transition-all
                             ${isActive 

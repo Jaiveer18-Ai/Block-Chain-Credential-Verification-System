@@ -62,20 +62,21 @@ const AdminManagement = () => {
 
     return (
         <div className="space-y-12 animate-in fade-in duration-700">
-            <header className="flex justify-between items-start">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h1 className="text-5xl font-black tracking-tighter">Authority Root</h1>
-                    <p className="text-[#a8a29e] mt-2">Manage personnel with high-level administrative clearance.</p>
+                    <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase">Authority Root</h1>
+                    <p className="text-[#a8a29e] mt-2 text-sm md:text-base italic">Manage personnel with high-level administrative clearance.</p>
                 </div>
                 
                 <button 
                     onClick={() => setIsCreating(!isCreating)}
-                    className="bg-primary text-[#0f0f14] px-8 py-4 rounded-2xl font-black transition-all hover:scale-105 shadow-lg shadow-primary/20 flex items-center gap-3"
+                    className="bg-primary text-[#0f0f14] px-8 py-4 rounded-2xl font-black transition-all hover:scale-105 shadow-lg shadow-primary/20 flex items-center justify-center gap-3 w-full md:w-auto"
                 >
                     <UserPlus className="w-5 h-5" />
                     {isCreating ? 'Cancel Protocol' : 'Onboard New Admin'}
                 </button>
             </header>
+
 
             {isCreating && (
                 <div className="max-w-2xl bg-[#1a1a24] border border-primary/20 rounded-[2.5rem] p-10 shadow-2xl animate-in zoom-in-95 duration-500">

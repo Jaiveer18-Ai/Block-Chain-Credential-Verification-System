@@ -62,26 +62,27 @@ const AdminCredentials = () => {
 
     return (
         <div className="space-y-10 animate-in fade-in duration-700">
-            <header className="flex justify-between items-end">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div>
-                    <h1 className="text-5xl font-black tracking-tighter">Registry Control</h1>
-                    <p className="text-[#a8a29e] mt-2">Oversee all immutable assets and handle administrative purges.</p>
+                    <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase">Registry Control</h1>
+                    <p className="text-[#a8a29e] mt-2 text-sm md:text-base italic">Oversee all immutable assets and handle administrative purges.</p>
                 </div>
                 
-                <div className="relative">
+                <div className="relative w-full md:w-auto">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#57534e]" />
                     <input 
                         type="text" 
                         placeholder="Search by degree, student, or Cred ID..."
-                        className="bg-[#1a1a24] border border-[#26262e] rounded-xl py-3 pl-12 pr-6 text-sm outline-none focus:border-primary transition-all w-96"
+                        className="bg-[#1a1a24] border border-[#26262e] rounded-xl py-4 pl-12 pr-6 text-sm outline-none focus:border-primary transition-all w-full md:w-96"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
             </header>
 
-            <div className="bg-[#1a1a24] border border-[#26262e] rounded-[2rem] overflow-hidden shadow-2xl">
-                <table className="w-full text-left border-collapse">
+
+            <div className="bg-[#1a1a24] border border-[#26262e] rounded-[2rem] overflow-x-auto shadow-2xl scrollbar-hide">
+                <table className="w-full text-left border-collapse min-w-[800px]">
                     <thead>
                         <tr className="border-b border-[#26262e] bg-white/[0.02]">
                             <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-[#57534e]">Asset Profile</th>

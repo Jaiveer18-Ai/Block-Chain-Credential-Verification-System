@@ -89,25 +89,26 @@ const AdminUsers = () => {
 
     return (
         <div className="space-y-10 animate-in fade-in duration-700">
-            <header className="flex justify-between items-end">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div>
-                    <h1 className="text-5xl font-black tracking-tighter">User Directory</h1>
-                    <p className="text-[#a8a29e] mt-2">Oversee all registered entities and institutional nodes.</p>
+                    <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase">User Directory</h1>
+                    <p className="text-[#a8a29e] mt-2 text-sm md:text-base italic">Oversee all registered entities and institutional nodes.</p>
                 </div>
                 
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+
                     <div className="relative">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#57534e]" />
                         <input 
                             type="text" 
                             placeholder="Student name, institution, email..."
-                            className="bg-[#1a1a24] border border-[#26262e] rounded-xl py-3 pl-12 pr-6 text-sm outline-none focus:border-primary transition-all w-80"
+                            className="bg-[#1a1a24] border border-[#26262e] rounded-xl py-4 pl-12 pr-6 text-sm outline-none focus:border-primary transition-all w-full md:w-80"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
                     <select 
-                        className="bg-[#1a1a24] border border-[#26262e] rounded-xl px-6 py-3 text-sm font-bold appearance-none cursor-pointer outline-none focus:border-primary"
+                        className="bg-[#1a1a24] border border-[#26262e] rounded-xl px-6 py-4 text-sm font-bold appearance-none cursor-pointer outline-none focus:border-primary w-full sm:w-auto"
                         value={roleFilter}
                         onChange={(e) => setRoleFilter(e.target.value)}
                     >
@@ -118,8 +119,8 @@ const AdminUsers = () => {
                 </div>
             </header>
 
-            <div className="bg-[#1a1a24] border border-[#26262e] rounded-[2rem] overflow-hidden shadow-2xl">
-                <table className="w-full text-left border-collapse">
+            <div className="bg-[#1a1a24] border border-[#26262e] rounded-[2rem] overflow-x-auto shadow-2xl scrollbar-hide">
+                <table className="w-full text-left border-collapse min-w-[800px]">
                     <thead>
                         <tr className="border-b border-[#26262e] bg-white/[0.02]">
                             <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-[#57534e]">Identity</th>
@@ -186,7 +187,7 @@ const AdminUsers = () => {
                                     </div>
                                 </td>
                                 <td className="px-8 py-6 text-right">
-                                    <div className="flex items-center justify-end gap-3 translate-x-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                                    <div className="flex items-center justify-end gap-3 md:translate-x-4 md:opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
                                         <button 
                                             onClick={() => handleToggleStatus(user._id, user.status)}
                                             className={`p-2.5 rounded-xl border transition-all ${

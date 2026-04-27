@@ -91,16 +91,16 @@ const AdminDashboard = () => {
     );
 
     return (
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-            <header>
+        <div className="space-y-6 md:space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+            <header className="px-2 md:px-0">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-primary/5 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest mb-4">
                     <Shield className="w-3 h-3" /> System Integrity Monitor
                 </div>
-                <h1 className="text-6xl font-black text-[#e8e4df] tracking-tighter">Root Overview</h1>
-                <p className="text-[#a8a29e] mt-2 text-lg font-medium">Global observability into cryptographic certificate lifecycle and peer nodes.</p>
+                <h1 className="text-3xl md:text-6xl font-black text-[#e8e4df] tracking-tighter leading-none">Root Overview</h1>
+                <p className="text-[#a8a29e] mt-2 text-sm md:text-lg font-medium">Global observability into cryptographic certificate lifecycle and peer nodes.</p>
             </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 px-2 md:px-0 pb-10">
                 <StatCard 
                     title="Global Users" 
                     value={stats?.totalUsers ?? 0} 
