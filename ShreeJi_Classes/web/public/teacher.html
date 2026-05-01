@@ -36,6 +36,15 @@ async function loadAll(){[stats,students,fees,notes,doubts,tests,results]=await 
 function render(){document.getElementById('content').innerHTML={dashboard:dashboardHTML,students:studentsHTML,fees:feesHTML,notes:notesHTML,more:moreHTML}[currentTab]();bindEvents()}
 
 function dashboardHTML(){const s=document.getElementById('userName')?.textContent||'Teacher';return`
+<div class="list-card column" style="background:#F3F4F6; margin-top: 10px;">
+  <p style="font-size:12px;margin-bottom:8px"><strong>🛠️ FCM Debug Dashboard</strong></p>
+  <div style="display:flex;gap:8px">
+    <button class="small-btn primary-btn" onclick="testNotify('self')">🔔 Test Me</button>
+    <input id="testUserId" class="input-field" placeholder="Student ID" style="margin:0;height:32px;font-size:12px">
+    <button class="small-btn outline-btn" onclick="testNotify(document.getElementById('testUserId').value)">Test ID</button>
+  </div>
+  <div id="debugMsg" style="font-size:11px;margin-top:8px"></div>
+</div>
 <div class="page-title">Welcome back! 👋<h2>${s}</h2></div>
 <div class="stats-grid">
 <div class="stat-card indigo" onclick="switchTab('students')"><span class="material-icons-round">people</span><div><h3>${stats.students}</h3><p>Students</p></div></div>
@@ -51,18 +60,8 @@ function dashboardHTML(){const s=document.getElementById('userName')?.textConten
 <button class="qa-btn" onclick="switchTab('fees')"><span class="material-icons-round">receipt</span>View Fees</button>
 </div>
 ${tests.filter(t=>t.date>Date.now()).slice(0,3).map(t=>`<div class="list-card"><span class="material-icons-round card-icon">assignment</span><div class="card-body"><strong>${t.title}</strong><small>${t.subject} • ${fmtDate(t.date)} ${t.time}</small></div><span class="chip green-chip">Upcoming</span></div>`).join('')}
-${doubts.filter(d=>d.status==='OPEN').slice(0,3).map(d=>`<div class="list-card"><span class="material-icons-round card-icon">help</span><div class="card-body"><strong>${d.studentName}: ${d.subject}</strong><small>${d.question.slice(0,60)}...</small></div><span class="chip amber-chip">Open</span></div>`).join('')}
-<div class="section-title">Debug Dashboard</div>
-<div class="list-card column" style="background:#F3F4F6">
-  <p style="font-size:12px;margin-bottom:8px">Test if pop-up notifications are working:</p>
-  <div style="display:flex;gap:8px">
-    <button class="small-btn primary-btn" onclick="testNotify('self')">🔔 Test Me</button>
-    <input id="testUserId" class="input-field" placeholder="Student ID" style="margin:0;height:32px;font-size:12px">
-    <button class="small-btn outline-btn" onclick="testNotify(document.getElementById('testUserId').value)">Test ID</button>
-  </div>
-  <div id="debugMsg" style="font-size:11px;margin-top:8px"></div>
-</div>
-`}
+${doubts.filter(d=>d.status==='OPEN').slice(0,3).map(d=>`<div class="list-card"><span class="material-icons-round card-icon">help</span><div class="card-body"><strong>${d.studentName}: ${d.subject}</strong><small>${d.question.slice(0,60)}...</small></div><span class="chip amber-chip">Open</span></div>`).join('')}`}
+
 
 function studentsHTML(){return`
 <div class="page-title"><h2>Students</h2><button class="fab-inline" onclick="showAddStudent()"><span class="material-icons-round">person_add</span>Add Student</button></div>
