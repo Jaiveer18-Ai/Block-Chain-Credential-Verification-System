@@ -13,24 +13,38 @@ cloudinary.config({
 });
 
 let admin = null;
+const firebaseAdmin = require('firebase-admin');
+let serviceAccount;
 try {
-  const firebaseAdmin = require('firebase-admin');
-  const files = fs.readdirSync(__dirname);
-  const serviceAccountFile = files.find(f => f.includes('firebase-adminsdk') && f.endsWith('.json'));
+  const dirs = [__dirname, '/etc/secrets'];
+  let serviceAccountFile = null;
+  for (const dir of dirs) {
+    if (fs.existsSync(dir)) {
+      const files = fs.readdirSync(dir);
+      const found = files.find(f => f.includes('firebase-adminsdk') && f.endsWith('.json'));
+      if (found) {
+        serviceAccountFile = path.join(dir, found);
+        break;
+      }
+    }
+  }
+
   if (serviceAccountFile) {
-    const serviceAccount = require(path.join(__dirname, serviceAccountFile));
+    serviceAccount = JSON.parse(fs.readFileSync(serviceAccountFile, 'utf8'));
     if (firebaseAdmin.apps.length === 0) {
-      admin = firebaseAdmin.initializeApp({ credential: firebaseAdmin.credential.cert(serviceAccount) });
+      admin = firebaseAdmin.initializeApp({
+        credential: firebaseAdmin.credential.cert(serviceAccount)
+      });
+      console.log('[FCM] ✅ Firebase Admin initialized from:', serviceAccountFile);
     } else {
       admin = firebaseAdmin.app();
+      console.log('[FCM] ✅ Firebase Admin already initialized');
     }
-    console.log('Firebase Admin initialized successfully using:', serviceAccountFile);
   } else {
-    console.log('Firebase Admin init skipped: No firebase-adminsdk JSON file found');
+    console.log('[FCM] ⚠️ Firebase Admin init skipped: No firebase-adminsdk JSON found in', dirs);
   }
-} catch(e) {
-  console.log('Firebase Admin init error:', e.message);
-  admin = null;
+} catch (error) {
+  console.error('[FCM] ❌ Error initializing Firebase Admin:', error);
 }
 
 const app = express();
@@ -63,19 +77,13 @@ async function notify(userId, title, message, type) {
         console.log(`[FCM] Sending to ${uid}: ${title}`);
         await admin.messaging().send({
           token: u.fcmToken,
-          notification: { title: String(title), body: String(message) },
           data: { 
             title: String(title), 
             body: String(message), 
             type: String(type || 'INFO') 
           },
           android: {
-            priority: 'high',
-            notification: {
-              channelId: 'shreeji_fcm',
-              priority: 'MAX',
-              sound: 'default'
-            }
+            priority: 'high'
           }
         });
         console.log(`[FCM] Success for ${uid}`);
@@ -128,18 +136,18 @@ app.post('/api/login', async (req, res) => {
 
 // NOTIFICATIONS
 app.get('/api/notifications', auth, async (req, res) => {
-  res.json(await all('SELECT * FROM notifications WHERE "userId"=$1 ORDER BY "createdAt" DESC LIMIT 50', [req.session.user.userId]));
+  res.json(await all('SELECT * FROM notifications WHERE LOWER("userId")=LOWER($1) ORDER BY "createdAt" DESC LIMIT 50', [req.session.user.userId]));
 });
 app.get('/api/notifications/unread-count', auth, async (req, res) => {
-  const c = await get('SELECT COUNT(*) as c FROM notifications WHERE "userId"=$1 AND read=false', [req.session.user.userId]);
+  const c = await get('SELECT COUNT(*) as c FROM notifications WHERE LOWER("userId")=LOWER($1) AND read=false', [req.session.user.userId]);
   res.json({ count: parseInt(c?.c || 0) });
 });
 app.put('/api/notifications/read-all', auth, async (req, res) => {
-  await run('UPDATE notifications SET read=true WHERE "userId"=$1', [req.session.user.userId]);
+  await run('UPDATE notifications SET read=true WHERE LOWER("userId")=LOWER($1)', [req.session.user.userId]);
   res.json({ ok: true });
 });
 app.post('/api/notifications/clear', auth, async (req, res) => {
-  await run('DELETE FROM notifications WHERE "userId"=$1', [req.session.user.userId]);
+  await run('DELETE FROM notifications WHERE LOWER("userId")=LOWER($1)', [req.session.user.userId]);
   res.json({ ok: true });
 });
 
