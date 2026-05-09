@@ -36,15 +36,6 @@ async function loadAll(){[stats,students,fees,notes,doubts,tests,results]=await 
 function render(){document.getElementById('content').innerHTML={dashboard:dashboardHTML,students:studentsHTML,fees:feesHTML,notes:notesHTML,more:moreHTML}[currentTab]();bindEvents()}
 
 function dashboardHTML(){const s=document.getElementById('userName')?.textContent||'Teacher';return`
-<div class="list-card column" style="background:#F3F4F6; margin-top: 10px;">
-  <p style="font-size:12px;margin-bottom:8px"><strong>🛠️ FCM Debug Dashboard</strong></p>
-  <div style="display:flex;gap:8px">
-    <button class="small-btn primary-btn" onclick="testNotify('self')">🔔 Test Me</button>
-    <input id="testUserId" class="input-field" placeholder="Student ID" style="margin:0;height:32px;font-size:12px">
-    <button class="small-btn outline-btn" onclick="testNotify(document.getElementById('testUserId').value)">Test ID</button>
-  </div>
-  <div id="debugMsg" style="font-size:11px;margin-top:8px"></div>
-</div>
 <div class="page-title">Welcome back! 👋<h2>${s}</h2></div>
 <div class="stats-grid">
 <div class="stat-card indigo" onclick="switchTab('students')"><span class="material-icons-round">people</span><div><h3>${stats.students}</h3><p>Students</p></div></div>
@@ -94,7 +85,7 @@ function showSubTab(tab,btn){document.querySelectorAll('.sub-tab').forEach(b=>b.
 function switchTab(tab){currentTab=tab;document.querySelectorAll('.nav-btn').forEach(b=>{b.classList.toggle('active',b.dataset.tab===tab)});render()}
 function filterStudents(q){const f=students.filter(s=>s.name.toLowerCase().includes(q.toLowerCase())||s.userId.toLowerCase().includes(q.toLowerCase()));document.getElementById('studentList').innerHTML=renderStudentList(f)}
 
-function modal(title,body,onSave,saveText){const m=document.createElement('div');m.className='modal-overlay';m.innerHTML=`<div class="modal"><div class="modal-header"><h3>${title}</h3><button class="icon-btn" onclick="this.closest('.modal-overlay').remove()"><span class="material-icons-round">close</span></button></div><div class="modal-body">${body}</div><div class="modal-footer"><button class="small-btn outline-btn" onclick="this.closest('.modal-overlay').remove()">Cancel</button><button class="small-btn primary-btn" id="modalSave">${saveText||'Save'}</button></div></div>`;document.body.appendChild(m);document.getElementById('modalSave').onclick=()=>{onSave(m)};m.onclick=e=>{if(e.target===m)m.remove()}}
+function modal(title,body,onSave,saveText){const m=document.createElement('div');m.className='modal-overlay';m.innerHTML=`<div class="modal"><div class="modal-header"><h3>${title}</h3><button class="icon-btn" onclick="this.closest('.modal-overlay').remove()"><span class="material-icons-round">close</span></button></div><div class="modal-body">${body}</div><div class="modal-footer"><button class="small-btn outline-btn" id="modalCancel" onclick="this.closest('.modal-overlay').remove()">Cancel</button><button class="small-btn primary-btn" id="modalSave">${saveText||'Save'}</button></div></div>`;document.body.appendChild(m);const saveBtn=document.getElementById('modalSave');saveBtn.onclick=async()=>{saveBtn.disabled=true;saveBtn.innerText='Wait...';document.getElementById('modalCancel').disabled=true;try{await onSave(m)}catch(e){alert('Error: '+e.message);saveBtn.disabled=false;saveBtn.innerText=saveText||'Save';document.getElementById('modalCancel').disabled=false}};m.onclick=e=>{if(e.target===m&&!saveBtn.disabled)m.remove()}}
 
 function showAddStudent(){const stuId='STU'+(100+Math.floor(Math.random()*900));const pwd=Math.random().toString(36).slice(-6);const curM=new Date().getMonth()+1;const curY=new Date().getFullYear();
 modal('Add New Student',`
@@ -140,7 +131,9 @@ function showAddNote(){modal('Upload Study Material',`<input class="input-field"
 <select class="input-field" id="mTarget"><option value="ALL">📢 All Students</option>${students.map(s=>`<option value="${s.userId}">👤 ${s.name} (${s.userId})</option>`).join('')}</select>`,async m=>{
 const fd=new FormData();fd.append('title',v('mTitle'));fd.append('subject',v('mSubject'));fd.append('topic',v('mTopic'));fd.append('type',v('mType'));fd.append('content',v('mContent'));fd.append('description',v('mDesc'));fd.append('targetStudentId',v('mTarget'));
 const f=document.getElementById('mFile').files[0];if(f)fd.append('file',f);
-await fetch('/api/notes',{method:'POST',body:fd});m.remove();await loadAll();render()},'Upload')}
+const res=await fetch('/api/notes',{method:'POST',body:fd});
+if(!res.ok){const errText=await res.text();throw new Error('Server returned '+res.status+': '+errText)}
+m.remove();await loadAll();render()},'Upload')}
 
 function showAddTest(){modal('Schedule Test',`<input class="input-field" id="mTitle" placeholder="Test Title"><input class="input-field" id="mSubject" placeholder="Subject"><input class="input-field" id="mDate" type="date"><input class="input-field" id="mTime" placeholder="Time" value="10:00 AM"><textarea class="input-field" id="mSyllabus" placeholder="Syllabus" rows="2"></textarea><input class="input-field" id="mMarks" type="number" placeholder="Total Marks" value="100"><select class="input-field" id="mTarget"><option value="ALL">All Students</option>${students.map(s=>`<option value="${s.userId}">${s.name} (${s.userId})</option>`).join('')}</select>`,async m=>{
   const dateStr=v('mDate');
@@ -173,9 +166,11 @@ async function clearNotifs(btn){
 }
 function closeNotifs(btn){btn.closest('.modal-overlay').remove()}
 
-async function testNotify(id){const uid=id==='self'?document.getElementById('userName').textContent.split('(')[0].trim():id;const d=document.getElementById('debugMsg');d.innerHTML='Sending...';try{const r=await API('/api/debug/notify/'+uid);d.innerHTML=`<span class="${r.ok?'green-text':'red-text'}">${r.message||'Request sent'}</span>`}catch(e){d.innerHTML='<span class="red-text">Error!</span>'}}
- 
- // Auto-poll every 15 seconds for updates
+// FCM Token Registration
+function onFCMTokenReceived(token){if(token)POST('/api/fcm-token',{token})}
+if(window.fcmToken)onFCMTokenReceived(window.fcmToken);
+
+// Auto-poll every 15 seconds for updates
  setInterval(async()=>{
    try {
      await loadAll();

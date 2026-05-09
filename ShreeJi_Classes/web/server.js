@@ -58,7 +58,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(session({ secret: process.env.SESSION_SECRET || 'shreeji-secret-2026', resave: false, saveUninitialized: false, cookie: { maxAge: 30*24*60*60*1000 } }));
 
-const noteUpload = multer({ storage: multer.diskStorage({ destination: (r,f,cb) => cb(null, path.join(__dirname,'uploads/notes')), filename: (r,f,cb) => cb(null, Date.now()+'-'+f.originalname.replace(/\s/g,'_')) }), limits: { fileSize: 50*1024*1024 } });
+const noteUpload = multer({ storage: multer.diskStorage({ destination: (r,f,cb) => cb(null, path.join(__dirname,'uploads/notes')), filename: (r,f,cb) => cb(null, Date.now()+'-'+f.originalname.replace(/\s/g,'_')) }), limits: { fileSize: 100*1024*1024 } });
 const qrUpload = multer({ storage: multer.diskStorage({ destination: (r,f,cb) => cb(null, path.join(__dirname,'uploads/qr')), filename: (r,f,cb) => cb(null, 'qr-'+Date.now()+path.extname(f.originalname)) }), limits: { fileSize: 5*1024*1024 } });
 
 function auth(req, res, next) { if (!req.session.user) return res.status(401).json({ error: 'Not logged in' }); next(); }
@@ -100,6 +100,22 @@ async function notify(userId, title, message, type) {
     console.log('[FCM] Admin not initialized');
   }
 }
+
+app.get('/api/debug/fcm-status/:userId', async (req, res) => {
+  const uid = req.params.userId.toLowerCase().trim();
+  try {
+    const u = await get('SELECT "fcmToken" FROM users WHERE LOWER("userId")=$1', [uid]);
+    res.json({
+      firebaseAdminInitialized: !!admin,
+      userExists: !!u,
+      tokenSaved: u ? (u.fcmToken && u.fcmToken.length > 10) : false,
+      tokenPreview: u && u.fcmToken ? u.fcmToken.substring(0, 15) + '...' : null,
+      tokenLength: u && u.fcmToken ? u.fcmToken.length : 0
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 async function notifyStudents(targetId, title, message, type) {
   const target = targetId.toLowerCase().trim();
   if (target === 'all') {
@@ -257,9 +273,19 @@ app.post('/api/notes', auth, teacherOnly, noteUpload.single('file'), async (req,
   
   if (req.file) {
     try {
-      console.log(`[Cloudinary] Uploading ${req.file.filename}...`);
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: 'auto',
+      console.log(`[Cloudinary] Uploading ${req.file.originalname}...`);
+      const isVideo = req.file.mimetype.startsWith('video/') || req.file.originalname.toLowerCase().match(/\\.(mp4|mkv|mov|avi|webm)$/);
+      const isRaw = req.file.mimetype === 'application/pdf' || req.file.originalname.toLowerCase().match(/\\.(pdf|doc|docx)$/);
+      
+      let resType = 'auto';
+      if (isVideo) resType = 'video';
+      else if (isRaw) resType = 'raw';
+
+      // Use upload_large for videos to prevent timeout/size limit issues
+      const uploadMethod = isVideo ? cloudinary.uploader.upload_large : cloudinary.uploader.upload;
+      
+      const result = await uploadMethod(req.file.path, {
+        resource_type: resType,
         folder: 'shreeji_notes'
       });
       filePath = result.secure_url;
