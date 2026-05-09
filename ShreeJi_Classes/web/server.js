@@ -77,13 +77,20 @@ async function notify(userId, title, message, type) {
         console.log(`[FCM] Sending to ${uid}: ${title}`);
         await admin.messaging().send({
           token: u.fcmToken,
+          notification: {
+            title: String(title),
+            body: String(message)
+          },
           data: { 
-            title: String(title), 
-            body: String(message), 
             type: String(type || 'INFO') 
           },
           android: {
-            priority: 'high'
+            priority: 'high',
+            notification: {
+              channelId: 'shreeji_fcm',
+              defaultSound: true,
+              defaultVibrateTimings: true
+            }
           }
         });
         console.log(`[FCM] Success for ${uid}`);
