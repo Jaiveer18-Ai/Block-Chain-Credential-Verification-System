@@ -15,18 +15,23 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@tesseract.js-data/eng": "^1.0.0",
     "axios": "^1.15.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.1",
     "ethers": "^6.16.0",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.5.1",
     "form-data": "^4.0.5",
     "jsonwebtoken": "^9.0.3",
     "mongodb-memory-server": "^11.0.1",
     "mongoose": "^9.4.1",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.5",
-    "pinata-web3": "^0.5.4"
+    "pdf-parse": "^1.1.1",
+    "pinata-web3": "^0.5.4",
+    "sharp": "^0.34.5",
+    "tesseract.js": "^7.0.0"
   }
 }

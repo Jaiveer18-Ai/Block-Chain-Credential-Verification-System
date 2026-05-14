@@ -2,7 +2,14 @@ const CredentialMeta = require('../models/CredentialMeta');
 const { uploadToIPFS } = require('../utils/ipfsUpload');
 const { issueCredentialOnChain, revokeCredentialOnChain } = require('../utils/blockchain');
 const { sendCredentialNotification } = require('../utils/emailService');
+const { buildCredentialBaseline } = require('../services/fraud/fraudDetectionService');
+const { sha256Buffer } = require('../services/fraud/hashService');
 const crypto = require('crypto');
+
+const extensionFromName = (fileName = '') => {
+    const index = fileName.lastIndexOf('.');
+    return index >= 0 ? fileName.slice(index).toLowerCase() : '.pdf';
+};
 
 const issueCredential = async (req, res) => {
     try {
@@ -20,8 +27,32 @@ const issueCredential = async (req, res) => {
             return res.status(400).json({ message: 'The student email address is invalid' });
         }
 
+        // Capture a local forensic baseline before publishing the document.
+        // If OCR/forensics fails, issuance continues with a hash baseline and a warning.
+        let baseline = {
+            originalDocumentHash: sha256Buffer(req.file.buffer),
+            originalMimeType: req.file.detectedMimeType || req.file.mimetype,
+            originalFileName: req.file.originalname,
+            baselineAnalysis: {
+                warnings: [],
+                analyzedAt: new Date(),
+            },
+        };
+
+        try {
+            baseline = await buildCredentialBaseline({
+                buffer: req.file.buffer,
+                mimeType: req.file.detectedMimeType || req.file.mimetype,
+                originalName: req.file.originalname,
+            });
+        } catch (baselineError) {
+            console.warn('Credential baseline AI analysis failed:', baselineError.message);
+            baseline.baselineAnalysis.warnings.push(`Baseline AI analysis failed: ${baselineError.message}`);
+        }
+
         // Upload to IPFS
-        const { ipfsHash, ipfsUrl } = await uploadToIPFS(req.file.buffer, `${studentId}_${degree}.pdf`, {
+        const ipfsFileName = `${studentId}_${degree}`.replace(/[^a-zA-Z0-9._-]/g, '_') + extensionFromName(req.file.originalname);
+        const { ipfsHash, ipfsUrl } = await uploadToIPFS(req.file.buffer, ipfsFileName, {
             studentId,
             degree
         });
@@ -53,10 +84,15 @@ const issueCredential = async (req, res) => {
             institution,
             ipfsHash,
             ipfsUrl,
+            originalDocumentHash: baseline.originalDocumentHash,
+            originalMimeType: baseline.originalMimeType,
+            originalFileName: baseline.originalFileName,
             transactionHash: blockchainRes.transactionHash,
             blockNumber: blockchainRes.blockNumber,
+            expiryDate: expiryDate ? new Date(expiryDate) : null,
             issuedBy,
-            isRevoked: false
+            isRevoked: false,
+            baselineAnalysis: baseline.baselineAnalysis
         });
 
         // Send Email Notification

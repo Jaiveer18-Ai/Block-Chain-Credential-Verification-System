@@ -18,6 +18,7 @@ import {
     Hash
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import AIFraudAnalysisPanel from '../components/AIFraudAnalysisPanel';
 
 const VerifyCredential = () => {
     const { credentialId } = useParams();
@@ -258,6 +259,8 @@ const VerifyCredential = () => {
                                 <span className="text-[10px] font-black tracking-widest uppercase">ZKP Authenticated</span>
                             </div>
                         </div>
+
+                        <AIFraudAnalysisPanel credentialId={result.credentialData.credentialId} />
                     </div>
                 )}
             </div>
